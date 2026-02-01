@@ -1,7 +1,7 @@
 # GoReleaser configuration for OpenCrawler
 # Documentation: https://goreleaser.com
 
-version: 2
+version: 1
 
 project_name: opencrawler
 
