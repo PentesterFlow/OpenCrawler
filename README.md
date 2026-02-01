@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/PentesterFlow/OpenCrawler/releases"><img src="https://img.shields.io/github/v/release/PentesterFlow/OpenCrawler?style=for-the-badge&color=blue" alt="Release"></a>
-  <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
+  <img src="https://img.shields.io/badge/Go-1.23+-00ADD8?style=for-the-badge&logo=go" alt="Go Version">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue?style=for-the-badge" alt="Platform">
 </p>
@@ -237,7 +237,7 @@ docker run -v $(pwd)/results:/results pentesterflow/opencrawler \
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| Go | 1.21+ | For building from source |
+| Go | 1.23+ | For building from source |
 | Chrome/Chromium | Any recent | For headless browser features |
 
 ---
