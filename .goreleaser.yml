@@ -1,0 +1,185 @@
+# GoReleaser configuration for OpenCrawler
+# Documentation: https://goreleaser.com
+
+version: 2
+
+project_name: opencrawler
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: opencrawler
+    main: ./cmd/crawler
+    binary: opencrawler
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    mod_timestamp: '{{ .CommitTimestamp }}'
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: 'Other Changes'
+      order: 999
+
+release:
+  github:
+    owner: PentesterFlow
+    name: OpenCrawler
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## OpenCrawler {{ .Tag }}
+
+    High-performance web application crawler for security testing and reconnaissance.
+
+    ### Installation
+
+    **Linux (amd64):**
+    ```bash
+    curl -LO https://github.com/PentesterFlow/OpenCrawler/releases/download/{{ .Tag }}/opencrawler_{{ .Version }}_linux_amd64.tar.gz
+    tar -xzf opencrawler_{{ .Version }}_linux_amd64.tar.gz
+    sudo mv opencrawler /usr/local/bin/
+    ```
+
+    **macOS (Apple Silicon):**
+    ```bash
+    curl -LO https://github.com/PentesterFlow/OpenCrawler/releases/download/{{ .Tag }}/opencrawler_{{ .Version }}_darwin_arm64.tar.gz
+    tar -xzf opencrawler_{{ .Version }}_darwin_arm64.tar.gz
+    sudo mv opencrawler /usr/local/bin/
+    ```
+
+    **macOS (Intel):**
+    ```bash
+    curl -LO https://github.com/PentesterFlow/OpenCrawler/releases/download/{{ .Tag }}/opencrawler_{{ .Version }}_darwin_amd64.tar.gz
+    tar -xzf opencrawler_{{ .Version }}_darwin_amd64.tar.gz
+    sudo mv opencrawler /usr/local/bin/
+    ```
+
+    **Windows:**
+    Download `opencrawler_{{ .Version }}_windows_amd64.zip` and extract.
+
+    **Docker:**
+    ```bash
+    docker pull ghcr.io/pentesterflow/opencrawler:{{ .Version }}
+    ```
+
+    ### Quick Start
+    ```bash
+    opencrawler crawl https://example.com --turbo -o results.json
+    ```
+  footer: |
+    ---
+
+    **Full Changelog**: https://github.com/PentesterFlow/OpenCrawler/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    Built with security researchers in mind.
+
+brews:
+  - name: opencrawler
+    repository:
+      owner: PentesterFlow
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    skip_upload: auto
+    directory: Formula
+    homepage: https://github.com/PentesterFlow/OpenCrawler
+    description: High-performance web application crawler for security testing
+    license: MIT
+    test: |
+      system "#{bin}/opencrawler", "--version"
+    install: |
+      bin.install "opencrawler"
+
+nfpms:
+  - id: packages
+    package_name: opencrawler
+    vendor: PentesterFlow
+    homepage: https://github.com/PentesterFlow/OpenCrawler
+    maintainer: PentesterFlow <team@pentesterflow.com>
+    description: High-performance web application crawler for security testing and reconnaissance
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    section: utils
+    priority: optional
+
+sboms:
+  - artifacts: archive
+
+signs:
+  - cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+      - "${artifact}"
+      - --yes
+    artifacts: checksum
+    output: true
