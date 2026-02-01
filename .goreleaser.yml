@@ -8,7 +8,6 @@ project_name: opencrawler
 before:
   hooks:
     - go mod tidy
-    - go generate ./...
 
 builds:
   - id: opencrawler
@@ -23,8 +22,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    goarm:
-      - "7"
     ignore:
       - goos: windows
         goarch: arm64
@@ -136,22 +133,6 @@ release:
 
     Built with security researchers in mind.
 
-brews:
-  - name: opencrawler
-    repository:
-      owner: PentesterFlow
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    skip_upload: auto
-    directory: Formula
-    homepage: https://github.com/PentesterFlow/OpenCrawler
-    description: High-performance web application crawler for security testing
-    license: MIT
-    test: |
-      system "#{bin}/opencrawler", "--version"
-    install: |
-      bin.install "opencrawler"
-
 nfpms:
   - id: packages
     package_name: opencrawler
@@ -167,19 +148,3 @@ nfpms:
     bindir: /usr/bin
     section: utils
     priority: optional
-
-sboms:
-  - artifacts: archive
-
-signs:
-  - cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
-    args:
-      - sign-blob
-      - "--output-signature=${signature}"
-      - "--output-certificate=${certificate}"
-      - "${artifact}"
-      - --yes
-    artifacts: checksum
-    output: true
