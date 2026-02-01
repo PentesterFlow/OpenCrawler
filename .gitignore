@@ -1,5 +1,6 @@
 # Binaries
 opencrawler
+dast-crawler
 *.exe
 *.exe~
 *.dll
